@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Exchange.WebServices.Data;
 
-namespace SdiEmailLib
+namespace SdiEmailLib.Processes
 {
     public class ReceiveImpl : IReceive
     {

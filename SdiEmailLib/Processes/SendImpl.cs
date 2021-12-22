@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net;
 using System.Net.Mail;
 using NLog;
 using SdiEmailLib.Dao;
@@ -7,7 +6,7 @@ using SdiEmailLib.Logging;
 using SdiEmailLib.Models;
 using SdiEmailLib.Utilities.cs;
 
-namespace SdiEmailLib
+namespace SdiEmailLib.Processes
 {
     public class SendImpl :ISend
     {
@@ -15,8 +14,7 @@ namespace SdiEmailLib
         private readonly Host _host;
         private readonly IDao _dao;
         private readonly Logger _logger;
-        private readonly string _sdiAppMasterConnStr;
-        
+
         public SendImpl(Host host, IDao dao, int appid, Logger logger = null)
         {
             if (appid <= 0)

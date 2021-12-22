@@ -2,6 +2,12 @@
 
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageVersion>$([System.DateTime]::Now.ToString("yyyy.MM.dd.HHmmss"))</PackageVersion>
+        <Authors>Cresp, Merl</Authors>
+        <Description>Email Library for Send Emails via Smtp and Receiving Email from O365 via Microsoft Exchange Web API</Description>
+        <RepositoryUrl>\\omnidev\repos.nuget</RepositoryUrl>
+        <RepositoryType>C#</RepositoryType>
     </PropertyGroup>
 
     <ItemGroup>

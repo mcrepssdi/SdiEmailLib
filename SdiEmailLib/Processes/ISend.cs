@@ -1,7 +1,7 @@
 ﻿using System.Net.Mail;
 using SdiEmailLib.Models;
 
-namespace SdiEmailLib
+namespace SdiEmailLib.Processes
 {
     public interface ISend
     {

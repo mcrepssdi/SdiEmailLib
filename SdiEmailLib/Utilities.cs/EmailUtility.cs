@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Net.Mime;
@@ -62,35 +58,37 @@ namespace SdiEmailLib.Utilities.cs
             return mailmsg;
         }
 
-        public static Transmission InitTransmission(int applicationId, List<string> attachments)
+        public static Transmission InitTransmission(int appid, string hostName, string fromAddress, SdiEmail email)
         {
-            string servername = Environment.GetEnvironmentVariable("COMPUTERNAME");
-            SerializeObj obj = new()
+            SerializeObj obj = new ()
             {
-                To = "", //ConnectionInfo.Host
-                HostName = servername,
-                Sender = servername,
-                Cc = string.Empty,
-                Bcc = string.Empty
+                Cc = string.Join(",", email.Cc.ToArray()),
+                Bcc = string.Join(",", email.Bcc.ToArray()),
+                To = string.Join(",", email.To.ToArray()),
+                HostName = hostName,
+                Sender = fromAddress
             };
-            attachments.ForEach(s =>
+            email.Attachments.ForEach(s =>
             {
-                string[] data = File.ReadAllLines(s);
-                obj.Attachments.Add(string.Join(Environment.NewLine, data));
+                if (File.Exists(s))
+                {
+                    string[] data = File.ReadAllLines(s);
+                    obj.Attachments.Add(string.Join(Environment.NewLine, data));
+                }
             });
             byte[] jsonUtf8Bytes = JsonSerializer.SerializeToUtf8Bytes(obj);
+
             return new Transmission
             {
-                ApplicationId = applicationId,
-                Recipients = "", //ConnectionInfo.Host,
-                RecipientsCc = string.Empty,
-                RecipientsBcc = string.Empty,
+                ApplicationId = appid,
+                HostName = hostName,
+                Sender = fromAddress,
+                Recipients = string.Join(",", email.To.ToArray()),
+                RecipientsCc = string.Join(",", email.Cc.ToArray()),
+                RecipientsBcc = string.Join(",", email.Bcc.ToArray()),
                 SerializedClass = nameof(SerializeObj),
                 SerializedFormat = "JsonUtf8Bytes",
-                SerializedData = Convert.ToBase64String(jsonUtf8Bytes),
-                TransmissionDateTime = DateTime.Now,
-                Sender = servername,
-                HostName = servername
+                SerializedData = Convert.ToBase64String(jsonUtf8Bytes)
             };
         }
     }

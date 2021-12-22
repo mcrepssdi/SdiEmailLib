@@ -27,7 +27,7 @@ namespace SdiEmailLib.Dao
                 using SqlConnection conn = new(_connStr);
                 DynamicParameters dp = new();
                 dp.Add("@ApplicationId", appId);
-                dynamic? transmissionFlag = conn.Query(sql, dp).FirstOrDefault();
+                dynamic transmissionFlag = conn.Query(sql, dp).FirstOrDefault();
                 _logger?.Trace($"TransmissionFlag: {transmissionFlag.CanTransmit}");
                 return transmissionFlag?.CanTransmit;
             }
