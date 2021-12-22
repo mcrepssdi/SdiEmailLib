@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Exchange.WebServices.Data;
@@ -11,13 +10,13 @@ using SdiEmailLib.Utilities.cs;
 
 namespace SdiEmailLib.Processes
 {
-    public class ReceiveImpl : IReceive
+    public class EmailReceiver : IReceive
     {
         private readonly Logger _logger;
         private readonly ExchangeConnector _connector;
         private const int _pageSize = 100;
 
-        public ReceiveImpl(Logger logger, ExchangeConnector exchangeConnector)
+        public EmailReceiver(Logger logger, ExchangeConnector exchangeConnector)
         {
             _logger = logger ?? LogManager.CreateNullLogger();
             _connector = exchangeConnector;
