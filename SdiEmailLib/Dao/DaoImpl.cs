@@ -18,7 +18,8 @@ namespace SdiEmailLib.Dao
             _connStr = connStr;
         }
         
-        public virtual bool CanTransmit(int appId)
+        /// <inheritdoc cref="IDao.CanTransmit"/>
+        public bool CanTransmit(int appId)
         {
             _logger?.Trace($"Verifying Transmission Flag for AppId: {appId}");
             const string sql = "SELECT CanTransmit FROM Application WHERE ApplicationId = @ApplicationId";
@@ -29,7 +30,8 @@ namespace SdiEmailLib.Dao
                 dp.Add("@ApplicationId", appId);
                 dynamic transmissionFlag = conn.Query(sql, dp).FirstOrDefault();
                 _logger?.Trace($"TransmissionFlag: {transmissionFlag.CanTransmit}");
-                return transmissionFlag?.CanTransmit;
+                if (transmissionFlag == null) return false;
+                return Convert.ToBoolean(transmissionFlag.CanTransmit);
             }
             catch (Exception e)
             {
@@ -38,7 +40,8 @@ namespace SdiEmailLib.Dao
             return false;
         }
 
-        public bool Presist(Transmission transmission, SqlTransaction transaction = null)
+        /// <inheritdoc cref="IDao.Presist(Transmission)"/>
+        public bool Presist(Transmission transmission)
         {
             _logger?.Trace("Entering...");
             StringBuilder sb = new();
@@ -63,12 +66,35 @@ namespace SdiEmailLib.Dao
 
             using SqlConnection conn = new(_connStr);
             conn.Open();
-            transaction = conn.BeginTransaction();
+            conn.Execute(sb.ToString(), dp);
+            return true;
+        }
+        
+        /// <inheritdoc cref="IDao.Presist(Transmission, SqlConnection, SqlTransaction)"/>
+        public bool Presist(Transmission transmission, SqlConnection conn, SqlTransaction transaction)
+        {
+            _logger?.Trace("Entering...");
+            StringBuilder sb = new();
+            sb.Append("INSERT INTO ElectronicTransmission ");
+            sb.Append(
+                " (ApplicationId, TransmissionDataTime, SerializedData, SerializedFormat, SerializedClass, HostName, Recipients, Sender) ");
+            sb.Append(" VALUES ");
+            sb.Append(
+                " (@ApplicationId, @TransmissionDataTime, @SerializedData, @SerializedFormat, @SerializedClass, @HostName, @Recipients, @Sender) ");
 
+            DynamicParameters dp = new();
+            dp.Add("@ApplicationId", transmission.ApplicationId);
+            dp.Add("@TransmissionDataTime", DateTime.Now);
+            dp.Add("@SerializedData", transmission.SerializedData);
+            dp.Add("@SerializedFormat", transmission.SerializedFormat);
+            dp.Add("@SerializedClass", transmission.SerializedClass);
+            dp.Add("@HostName", transmission.HostName);
+            dp.Add("@Recipients", transmission.Recipients);
+            dp.Add("@RecipientsCc", transmission.RecipientsCc);
+            dp.Add("@RecipientsBcc", transmission.RecipientsBcc);
+            dp.Add("@Sender", transmission.Sender);
+            
             conn.Execute(sb.ToString(), dp, transaction: transaction);
-
-            transaction.Commit();
-
             return true;
         }
     }

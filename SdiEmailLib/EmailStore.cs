@@ -9,19 +9,28 @@ using SdiEmailLib.Utilities.cs;
 
 namespace SdiEmailLib
 {
-    public class SendStore
+    public class EmailStore
     {
         private readonly ISend _send;
         private readonly IDao _dao;
         private readonly Logger _logger;
 
-        public SendStore(ISend send, IDao dao, Logger logger = null)
+        public EmailStore(ISend send, IDao dao, Logger logger = null)
         {
             _send = send;
             _dao = dao;
             _logger = logger ?? LogManager.CreateNullLogger();
         }
         
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="connStr"></param>
+        /// <param name="host"></param>
+        /// <param name="applicationId"></param>
+        /// <param name="mailPriority"></param>
+        /// <param name="isBodyHtml"></param>
         public void Send(SdiEmail email, string connStr, Host host, int applicationId, MailPriority mailPriority = MailPriority.Normal, bool isBodyHtml = false)
         {
             _logger?.Trace("Entering...");
@@ -31,8 +40,8 @@ namespace SdiEmailLib
                 using SqlConnection conn = new(connStr);
                 transaction = conn.BeginTransaction();
                 
-                Transmission transmission = EmailUtility.InitTransmission(applicationId, host.HostName, host.FromAddress, email);
-                _dao.Presist(transmission);
+                Transmission transmission = EmailUtil.InitTransmission(applicationId, host.HostName, host.FromAddress, email);
+                _dao.Presist(transmission, conn, transaction);
                 _send.Send(email, mailPriority, host.FromAddress, isBodyHtml);
                 
                 transaction.Commit();
@@ -49,14 +58,29 @@ namespace SdiEmailLib
             }
         }
         
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="host"></param>
+        /// <param name="applicationId"></param>
+        /// <param name="mailPriority"></param>
+        /// <param name="isBodyHtml"></param>
         public void Send(SdiEmail email, Host host, int applicationId, MailPriority mailPriority = MailPriority.Normal, bool isBodyHtml = false)
         {
             _logger?.Trace("Entering...");
             _send.Send(email, mailPriority, host.FromAddress, isBodyHtml);
-            Transmission transmission = EmailUtility.InitTransmission(applicationId, host.HostName, host.FromAddress, email);
+            Transmission transmission = EmailUtil.InitTransmission(applicationId, host.HostName, host.FromAddress, email);
             _dao.Presist(transmission);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="fromAddress"></param>
+        /// <param name="mailPriority"></param>
+        /// <param name="isBodyHtml"></param>
         public void Send(SdiEmail email, string fromAddress, MailPriority mailPriority = MailPriority.Normal, bool isBodyHtml = false)
         {
             _logger?.Trace("Entering...");

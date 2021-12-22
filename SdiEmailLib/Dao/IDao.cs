@@ -6,7 +6,7 @@ namespace SdiEmailLib.Dao
     public interface IDao
     {
         public bool CanTransmit(int appId);
-
-        public bool Presist(Transmission transmission, SqlTransaction transaction = null);
+        public bool Presist(Transmission transmission);
+        public bool Presist(Transmission transmission, SqlConnection conn, SqlTransaction transaction);
     }
 }

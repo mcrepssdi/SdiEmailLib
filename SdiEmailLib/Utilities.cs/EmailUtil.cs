@@ -5,11 +5,13 @@ using System.Net.Mail;
 using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Exchange.WebServices.Data;
 using SdiEmailLib.Models;
+using Attachment = System.Net.Mail.Attachment;
 
 namespace SdiEmailLib.Utilities.cs
 {
-    public static class EmailUtility
+    public static class EmailUtil
     {
         
         public static SmtpClient GetClient(Host host)
@@ -91,5 +93,15 @@ namespace SdiEmailLib.Utilities.cs
                 SerializedData = Convert.ToBase64String(jsonUtf8Bytes)
             };
         }
+
+        public static ExchangeService GetExchangeService(ExchangeConnector connector)
+        {
+            return new ExchangeService(ExchangeVersion.Exchange2013_SP1)
+            {
+                Credentials = new WebCredentials(connector.Username, connector.Password, connector.Domain),
+                Url = new Uri(connector.Uri)
+            };
+        }
+
     }
 }

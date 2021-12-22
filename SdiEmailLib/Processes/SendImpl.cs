@@ -17,19 +17,14 @@ namespace SdiEmailLib.Processes
 
         public SendImpl(Host host, IDao dao, int appid, Logger logger = null)
         {
-            if (appid <= 0)
-            {
-                throw new ArgumentException("ApplicationId is required and must be >= zero.");
-            }
             _logger = logger ?? LogManager.CreateNullLogger();
             _applicationId = appid;
             _dao = dao;
             _host = host;
-        }
-        
-        public bool Send(SdiEmail email, MailPriority mailPriority, string from, bool IsBodyHtml)
-        {
-            _logger?.Trace("Sending...");
+            if (appid <= 0)
+            {
+                throw new ArgumentException("ApplicationId is required and must be >= zero.");
+            }
             bool res = _dao.CanTransmit(_applicationId);
             if (!res)
             {
@@ -37,10 +32,14 @@ namespace SdiEmailLib.Processes
                 _logger?.Error(msg);
                 throw new Exception(msg);
             }
+        }
+        
+        public bool Send(SdiEmail email, MailPriority mailPriority, string from, bool IsBodyHtml)
+        {
+            _logger?.Trace("Sending...");
+            MailMessage mailMsg = EmailUtil.InitMailMessage(email, mailPriority, from, IsBodyHtml);
             
-            MailMessage mailMsg = EmailUtility.InitMailMessage(email, mailPriority, from, IsBodyHtml);
-            
-            using SmtpClient client = EmailUtility.GetClient(_host);
+            using SmtpClient client = EmailUtil.GetClient(_host);
             client.Send(mailMsg);
 
             EventLogger.Info(_applicationId, $"Email successfully to {string.Join(",", email.To)}", _logger);
